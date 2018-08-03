@@ -1,7 +1,7 @@
 '''
-Ver： 0.01
+Ver： 0.02
 copyright：Funny
-office git test2
+加入对结构成立的判断，并给出当前周期离结构成立的距离
 '''
 #导入需要的库
 import pandas as pd
