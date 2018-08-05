@@ -2,6 +2,7 @@
 Ver： 0.02
 copyright：Funny
 加入对结构成立的判断，并给出当前周期离结构成立的距离
+在家编辑测试
 '''
 #导入需要的库
 import pandas as pd
