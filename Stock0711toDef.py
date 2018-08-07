@@ -82,8 +82,10 @@ def is_dev(code,start,end,ktype,dev_time): #是否形成底背离判断函数,de
                     ls_dev_top_id=id
             ls_dev_top_id = ls_dev_top.index(ls_dev_top_id)
         #找出该位置是否存在背离
-        is_dev_bot=np.NaN
-        is_dev_top=np.NaN
+        is_dev_bot=np.NaN #是否底背离
+        is_dev_top=np.NaN #是否顶背离
+        is_dev_bot_structure=np.NaN #是否底背离结构成立
+        is_dev_top_structure=np.NaN #是否顶背离结构成立
         if(len(ls_dev_bot)>=2): #必须有2个以上波段周期才可以判断
             if(~np.isnan(ls_dev_bot_id)): #如果查询时间在Diff小于DEA区段中，判断是否存在底背离
                 cur_diff_min = data[ls_dev_bot[ls_dev_bot_id][0]:ls_dev_bot[ls_dev_bot_id][1] + 1].diff2.min() #指定区段diff最低值
@@ -92,56 +94,37 @@ def is_dev(code,start,end,ktype,dev_time): #是否形成底背离判断函数,de
                 pre_low_min = data[ls_dev_bot[ls_dev_bot_id+1][0]:ls_dev_bot[ls_dev_bot_id+1][1] + 1].low.min()
                 if((cur_diff_min>pre_diff_min)&(cur_low_min<pre_low_min)):
                     is_dev_bot=True
+
+
         if(len(ls_dev_top)>=2): #必须有2个以上波段周期才可以判断
             if(~np.isnan(ls_dev_top_id)): #如果查询时间在Diff大于DEA区段中，判断是否存在顶背离
                 cur_diff_max = data[ls_dev_top[ls_dev_top_id][0]:ls_dev_top[ls_dev_top_id][1] + 1].diff2.max() #指定区段diff最高值
-                cur_high_max = data[ls_dev_top[ls_dev_top_id][0]:ls_dev_top[ls_dev_top_id][1] + 1].high.max() #指定区段low最低值
+                cur_high_max = data[ls_dev_top[ls_dev_top_id][0]:ls_dev_top[ls_dev_top_id][1] + 1].high.max() #指定区段high最高值
                 pre_diff_max = data[ls_dev_top[ls_dev_top_id+1][0]:ls_dev_top[ls_dev_top_id+1][1] + 1].diff2.max()
                 pre_high_max = data[ls_dev_top[ls_dev_top_id+1][0]:ls_dev_top[ls_dev_top_id+1][1] + 1].high.max()
                 if((cur_diff_max<pre_diff_max)&(cur_high_max>pre_high_max)):
                     is_dev_top=True
+
+
+
         return data, is_dev_bot, is_dev_top
     else:
         return data,np.NaN,np.NaN
 
+def is_structure(code,start,end,ktype,dev_time,structure_time):#是否成结构判断
+    data,is_dev_bot,is_dev_top=(code,start,end,ktype,dev_time)
+    structure_time_id=data[data.date==structure_time].index
+    structure_diff=data.loc[structure_time_id].diff2
+    structure_dea=data.loc[structure_time_id].dea
+    structure_diff_dea=structure_diff-structure_diff_dea
+    if(is_dev_bot==True)&(structure_diff_dea>0):
+        return 'bot_stru_true'
+    else:
+        return 'bot_stru_false'
 
 
-
-
-
-
-
-    #背离判断
-    #底背离判断
-
-    #顶背离判断
-
-    print(ls_dev_bot)
-    print(ls_dev_top)
-    return data,ls_dev_bot,ls_dev_top
-
-
-'''
-#测试用
-
-    ls_dev_bot=dev_bot(df_dev_bot)
-    ls_dev_top=dev_top(df_dev_top)
-    return ls_dev_bot,ls_dev_top
-
-ls_bot,ls_top=is_devergence('300056','2017-01-01','2018-07-27','D')
-'''
-
-    #判断相邻2个波谷的Diff、low的值是否形成背离
-        if(len(ls_dev_bot)>=2):
-            dbl1_diff_min=data[ls_dev_bot[0][0]:ls_dev_bot[0][1]+1].diff2.min()
-            dbl1_low_min=data[ls_dev_bot[0][0]:ls_dev_bot[0][1]+1].low.min()
-
-            dbl2_diff_min=data[ls_dev_bot[1][0]:ls_dev_bot[1][1]+1].diff2.min()
-            dbl2_low_min=data[ls_dev_bot[1][0]:ls_dev_bot[1][1]+1].low.min()
-
-            if(dbl2_low_min>dbl1_low_min)&(dbl2_diff_min<dbl1_diff_min)&(data.iloc[-1].diff2>dbl1_diff_min)&(abs(data.iloc[-1].dea-data.iloc[-1].diff2)<0.1): #背离且最新diff高于低点diff，即有反身向上趋势
-                codes_dbl.append(code)
-
-
-codes=get_stockcodes('cyb')
-print(codes)
+for code in ts.get_gem_classified().code:
+    data,bot,top=is_dev(code,'2017-01-01','2018-08-07','D','2018-08-06')
+    bot_stru=is_structure(code,'2017-01-01','2018-08-07','D','2018-08-06','2018-08-07')
+    if(bot==True)&(bot_stru=='bot_stru_true'):
+        print(code,bot_stru)
