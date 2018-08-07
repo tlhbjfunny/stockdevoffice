@@ -60,8 +60,11 @@ def dev_top(df_dev_top):
     return ls_dev_top #返回顶背离区段id列表
 
 def is_dev(code,start,end,ktype,dev_time): #是否形成底背离判断函数,dev_time默认时间为当前时间
+    #判断指定时间节点数据是否存在（未写）
+
     #根据ktype,对dev_time值进行规整化处理函数（not coding）
     data,df_dev_top,df_dev_bot=get_df_dev(code, start, end, ktype)
+
     ls_dev_bot=dev_bot(df_dev_bot)
     ls_dev_top=dev_top(df_dev_top)
 
