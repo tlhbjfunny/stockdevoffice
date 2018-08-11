@@ -70,6 +70,14 @@ def is_dev(code,start,end,ktype,dev_time): #是否形成底背离判断函数,de
 
     # 根据规整化后的dev_time,找出其位于的波段区间list序号
     dev_time_id=data[data.date==dev_time].index #取得指定时间位于data的位置id
+    #判断指定时间所处波段类型 识别变量：dev_flag 值：bot:DEA>DIFF top:DEA<DIFF
+    dev_flag=''
+    if (((data.loc[dev_time_id].dea-data.loc[dev_time_id].diff2)>0).values[0]):
+        dev_flag='bot' #dea在diff之上，那么处于调整结构中，前导为死叉，那么接着判断顶背离是否成结构
+    elif(((data.loc[dev_time_id].dea-data.loc[dev_time_id].diff2)<0).vlaues[0]):
+        dev_flag='top' #dea在diff之下，那么处于预期上涨结构中，前导为金叉，那么接着判断底背离是否成结构
+    #根据dev_flag值决定除计算指定时间所处背离种类外，另需计算前导一周期背离种类
+    #从而判断结构是否成立
     ls_dev_bot_id = np.NaN
     ls_dev_top_id = np.NaN
     if(len(dev_time_id)!=0): #指定时间节点在data中找到
@@ -102,6 +110,8 @@ def is_dev(code,start,end,ktype,dev_time): #是否形成底背离判断函数,de
                 pre_high_max = data[ls_dev_top[ls_dev_top_id+1][0]:ls_dev_top[ls_dev_top_id+1][1] + 1].high.max()
                 if((cur_diff_max<pre_diff_max)&(cur_high_max>pre_high_max)):
                     is_dev_top=True
+    #判断是否成结构
+
         return data, is_dev_bot, is_dev_top
     else:
         return data,np.NaN,np.NaN
